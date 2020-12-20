@@ -16,13 +16,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Movie> movies = List();
   bool hasLoaded = true;
-  MovieDatabase db;
   final PublishSubject subject = PublishSubject<String>();
   @override
   void initState() {
     super.initState();
-    db = MovieDatabase();
-    db.initDb();
     subject.stream
         //.debounceTime(Duration(milliseconds: 400))
         .listen(searchMovies);
@@ -76,38 +73,32 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     subject.close();
-    db.closeDb();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Movie Searcher'),
-      ),
-      body: Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              // autocorrect: false,
-              // keyboardType: TextInputType.text,
-              onChanged: (String string) => (subject.add(string)),
+    return Container(
+      padding: EdgeInsets.all(10.0),
+      child: Column(
+        children: <Widget>[
+          TextField(
+            // autocorrect: false,
+            // keyboardType: TextInputType.text,
+            onChanged: (String string) => (subject.add(string)),
+          ),
+          hasLoaded ? Container() : CircularProgressIndicator(),
+          Expanded(
+            child: ListView.builder(
+              //itemExtent: 50,
+              padding: EdgeInsets.all(10.0),
+              itemCount: movies.length,
+              itemBuilder: (BuildContext context, int index) {
+                return MovieView(movies[index]);
+              },
             ),
-            hasLoaded ? Container() : CircularProgressIndicator(),
-            Expanded(
-              child: ListView.builder(
-                //itemExtent: 50,
-                padding: EdgeInsets.all(10.0),
-                itemCount: movies.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return MovieView(movies[index], db);
-                },
-              ),
-            )
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

@@ -4,20 +4,33 @@ import 'package:moviesearcher/model/model.dart';
 
 class MovieView extends StatefulWidget {
   final Movie movie;
-  final MovieDatabase database;
-  MovieView(this.movie, this.database);
+  MovieView(
+    this.movie,
+  );
   @override
   _MovieViewState createState() => _MovieViewState();
 }
 
 class _MovieViewState extends State<MovieView> {
   Movie movieState;
-  MovieDatabase db;
   @override
   void initState() {
     movieState = widget.movie;
-    db = widget.database;
+    MovieDatabase db = MovieDatabase();
+    db.getMovie(movieState.id).then((movie) {
+      setState(() {
+        movieState.favored = movie.favored;
+      });
+    });
     super.initState();
+  }
+
+  void onPressed() {
+    MovieDatabase db = MovieDatabase();
+    setState(() => movieState.favored = !movieState.favored);
+    movieState.favored == true
+        ? db.addMovie(movieState)
+        : db.deleteMovies(movieState.id);
   }
 
   @override
@@ -42,10 +55,7 @@ class _MovieViewState extends State<MovieView> {
         icon: movieState.favored ? Icon(Icons.star) : Icon(Icons.star_border),
         color: Colors.white,
         onPressed: () {
-          setState(() => movieState.favored = !movieState.favored);
-          movieState.favored == true
-              ? db.addMovie(movieState)
-              : db.deleteMovies(movieState.id);
+          onPressed();
         },
       ),
       title: Container(
